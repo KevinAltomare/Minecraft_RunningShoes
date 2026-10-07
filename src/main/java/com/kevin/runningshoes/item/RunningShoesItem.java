@@ -2,6 +2,7 @@ package com.kevin.runningshoes.item;
 
 import com.kevin.runningshoes.RunningShoesMod;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -22,8 +23,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 
 public class RunningShoesItem extends Item {
+    private static final ResourceKey<EquipmentAsset> EQUIPMENT_ASSET =
+            ResourceKey.create(EquipmentAssets.ROOT_ID, RunningShoesMod.id("running_shoes"));
     public static final RunningShoesItem INSTANCE = new RunningShoesItem(createSettings());
 
     private static Item.Properties createSettings() {
@@ -42,6 +48,13 @@ public class RunningShoesItem extends Item {
         return new Item.Properties()
                 .setId(ResourceKey.create(Registries.ITEM, RunningShoesMod.id("running_shoes")))
                 .humanoidArmor(ArmorMaterials.LEATHER, ArmorType.BOOTS)
+                .component(
+                        DataComponents.EQUIPPABLE,
+                        Equippable.builder(EquipmentSlot.FEET)
+                                .setEquipSound(ArmorMaterials.LEATHER.equipSound())
+                                .setAsset(EQUIPMENT_ASSET)
+                                .build()
+                )
                 .durability(300)
                 .attributes(attributes);
     }

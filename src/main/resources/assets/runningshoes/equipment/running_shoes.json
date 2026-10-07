@@ -1,0 +1,9 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "runningshoes:running_shoes"
+      }
+    ]
+  }
+}
