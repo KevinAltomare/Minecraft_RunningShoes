@@ -1,47 +1,58 @@
 package com.kevin.runningshoes.item;
 
 import com.kevin.runningshoes.RunningShoesMod;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterials;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.equipment.ArmorMaterials;
+import net.minecraft.world.item.equipment.ArmorType;
 
-public class RunningShoesItem extends ArmorItem {
+public class RunningShoesItem extends Item {
+    public static final RunningShoesItem INSTANCE = new RunningShoesItem(createSettings());
 
-    // The single instance of the item
-    public static final RunningShoesItem INSTANCE =
-            new RunningShoesItem(new Item.Settings().maxDamage(300));
+    private static Item.Properties createSettings() {
+        ItemAttributeModifiers attributes = ArmorMaterials.LEATHER
+                .createAttributes(ArmorType.BOOTS)
+                .withModifierAdded(
+                        Attributes.MOVEMENT_SPEED,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath(RunningShoesMod.MOD_ID, "running_shoes_speed_bonus"),
+                                0.05,
+                                Operation.ADD_MULTIPLIED_TOTAL
+                        ),
+                        EquipmentSlotGroup.FEET
+                );
 
-    public RunningShoesItem(Item.Settings settings) {
-        super(ArmorMaterials.LEATHER, EquipmentSlot.FEET,
-                settings.attributeModifiers(
-                        ArmorItem.createAttributeModifiers(
-                                ArmorMaterials.LEATHER,
-                                EquipmentSlot.FEET,
-                                settings
-                        ).with(
-                                net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED,
-                                new net.minecraft.entity.attribute.EntityAttributeModifier(
-                                        java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"),
-                                        "running_shoes_speed_bonus",
-                                        0.05,
-                                        net.minecraft.entity.attribute.EntityAttributeModifier.Operation.MULTIPLY_TOTAL
-                                )
-                        )
-                )
-        );
+        return new Item.Properties()
+                .setId(ResourceKey.create(Registries.ITEM, RunningShoesMod.id("running_shoes")))
+                .humanoidArmor(ArmorMaterials.LEATHER, ArmorType.BOOTS)
+                .durability(300)
+                .attributes(attributes);
     }
 
-    // Called from RunningShoesMod.onInitialize()
+    public RunningShoesItem(Item.Properties properties) {
+        super(properties);
+    }
+
     public static void register() {
         Registry.register(
-                Registries.ITEM,
+                BuiltInRegistries.ITEM,
                 RunningShoesMod.id("running_shoes"),
                 INSTANCE
         );
@@ -49,37 +60,30 @@ public class RunningShoesItem extends ArmorItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, net.minecraft.entity.Entity entity, int slot, boolean selected) {
-        if (!(entity instanceof PlayerEntity player)) return;
-
-        // Only apply effects if actually worn
-        ItemStack boots = player.getEquippedStack(EquipmentSlot.FEET);
-        if (!boots.isOf(this)) return;
-
-        if (player.isSprinting()) {
-
-            // Speed boost while sprinting
-            player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                    net.minecraft.entity.effect.StatusEffects.SPEED,
-                    20, // 1 second
-                    1,  // Speed II
-                    false,
-                    false
-            ));
-
-            // Durability drain every 3 seconds
-            if (!world.isClient && world.getTime() % 60 == 0) {
-                stack.damage(1, player, p -> p.sendEquipmentBreakStatus(EquipmentSlot.FEET));
-            }
-
-            // Particle trail
-            world.addParticle(
-                    ParticleTypes.CLOUD,
-                    player.getX(),
-                    player.getY(),
-                    player.getZ(),
-                    0.0, 0.0, 0.0
-            );
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
+        if (!(entity instanceof Player player)
+                || slot != EquipmentSlot.FEET
+                || !player.getItemBySlot(EquipmentSlot.FEET).is(this)
+                || !player.isSprinting()) {
+            return;
         }
+
+        player.addEffect(new MobEffectInstance(MobEffects.SPEED, 20, 1, false, false));
+
+        if (level.getGameTime() % 60 == 0) {
+            stack.hurtAndBreak(1, player, EquipmentSlot.FEET);
+        }
+
+        level.sendParticles(
+                ParticleTypes.CLOUD,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                1,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+        );
     }
 }

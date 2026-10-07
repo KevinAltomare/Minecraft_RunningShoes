@@ -7,18 +7,10 @@
     " L "
   ],
   "key": {
-    "L": {
-      "item": "minecraft:leather"
-    },
-    "F": {
-      "item": "minecraft:feather"
-    },
-    "R": {
-      "item": "minecraft:red_dye"
-    },
-    "M": {
-      "item": "minecraft:phantom_membrane"
-    }
+    "L": "minecraft:leather",
+    "F": "minecraft:feather",
+    "R": "minecraft:red_dye",
+    "M": "minecraft:phantom_membrane"
   },
   "result": {
     "id": "runningshoes:running_shoes",
