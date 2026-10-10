@@ -1,10 +1,19 @@
 # Running Shoes
 
-Running Shoes is a Fabric mod that adds a pair of running shoes to Minecraft.
+Running Shoes is a simple Fabric mod that adds a special pair of boots that make you run fast, obviously. Equip them to move faster, sprint harder, and look really good while doing it.
+
+## Features
+- Custom running‑shoe item
+
+- Custom armor texture when worn
+
+- Fully Fabric compatible
+
+- Simple, standalone, and safe to add to existing worlds
 
 ## Armor texture
 
-The worn-shoe texture is `src/main/resources/assets/runningshoes/textures/entity/equipment/humanoid/running_shoes.png`. It is a transparent 64x32 armor UV texture, colored to match the inventory icon. To edit it, open that file in a pixel-art editor at its original size; the item icon itself cannot be used directly because Minecraft maps armor textures onto the player model.
+The shoe texture lives at `src/main/resources/assets/runningshoes/textures/entity/equipment/humanoid/running_shoes.png`. It uses Minecraft’s standard armor UV layout (64×32). If you want to edit it, open the file at its original resolution in a pixel‑art editor — the inventory icon can’t be used directly because armor textures wrap around the player model.
 
 ## License
 
